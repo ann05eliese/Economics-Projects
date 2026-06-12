@@ -1,0 +1,577 @@
+---
+title: "Econometrics Final Project"
+author: "Anneliese Hall"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+  “I have no idea where this will lead us, but I have a definite feeling it will be a place both wonderful and strange,” said fictional Agent Dale Cooper, from the 90’s hit television series, Twin Peaks (Frost & Lynch, 1990).  While Agent Dale Cooper was sent by the FBI to investigate a murder in a small town, the mystery of this study concerns itself with something quite different: internet access and its effect on income levels in South Carolina. 
+
+  In recent years, the public and private broadband investment in South Carolina has increased significantly. For example, AT&T reported to have invested 825 million in broadband across South Carolina, between 2016 and 2018 (AT&T, 2019). More recently the American Rescue Plan Act (ARPA) resulted in a commitment of 400 million to “over 112,380 unserved or underserved Broadband Serviceable Locations (BSLs) statewide,” (South Carolina Office of Regulatory Staff [ORS], 2024). Naturally, the increase in the investment of broadband raises questions about its effect on the average household in South Carolina. The main question this research aims to answer is: What is the relationship between broadband internet access and household income in rural and urban counties in South Carolina? This study hypothesizes that increased broadband internet access is positively correlated with median household income.
+
+
+# Literature Review 
+  To start, Everett M. Rogers’ book, Diffusion of Innovations, discusses the very relevant theory of hierarchical diffusion, providing a necessary perspective on spatial disparities in infrastructure. Most relevant, Rogers (2003) generalizes that “Cosmopolite channels are relatively more important than localite channels for earlier adopters than for later adopters” (p. 201). In context of the present study, Rogers’ framework implies that urban areas are more likely to adopt innovations, quicker and earlier than rural areas, creating a lag between urban and rural adaptation of innovations. 
+  
+  Moving forward, Lars-Hendrik Röller and Leonard Waverman (2001) investigated how telecommunication infrastructure affects economic growth through a production function in a macro model. Most relevantly, they discuss different ways in which telecommunication infrastructure investment produces positive externalities. They argue that there is an increase in demand for goods and services regarding telecommunication materials such as cables and switches, benefiting the surrounding organizations. They also argue that the transaction costs of doing research, ordering, and gathering information fall, causing the costs of doing business to fall, benefiting organizations as well. While Röller and Waverman (2001) incorporate a production function using data from 21 countries to investigate the impact of telecommunication infrastructure, they do not examine the impact on a state-level.
+  
+  Next, it is important to mention Czernich, Falck, Kretchmer, and Woessmann’s (2011) contribution of a panel data analysis regarding the effect of broadband infrastructure on economic growth across countries. It is important to not that this research is very similar to Röller and Waverman’s (2001) because they both analyze the issue on a macro level. However, a significant difference between the two papers is that Czernich and her colleagues (2011) opt in for a panel data analysis across all the different countries and employ GDP per capita as their measure of economic growth, instead of looking at it through a production function like Röller and Waverman. Additionally, this paper also does not examine the issue on a state level or county level. However, it is important to note that Czernich and her colleagues’ (2011) most important findings highlight that broadband access is another way to decrease information costs, like Röller and Waverman (2001) also mentioned.  
+  
+  Lastly, it is also worthy to note that Whitacre, Gallardo, & Strover’s (2014) research looks at the contribution of broadband access to the economic growth of rural areas in the United States between 2001 and 2010, on a county level. Their research is the most like the present study due to its focus on the United States counties and rural integration of broadband and its effect on economic growth. They utilize median household income as their measure of economic growth, employment, poverty, and a percentage of employees who are either a creative class or non-farm proprietors as their control variables. However, they restrict their analysis to rural areas and omit urban areas all together. 
+
+
+# Methodology and Data 
+  To understand the relationship between broadband internet access and median household income, a panel data analysis was the most appropriate method because it better captures the nature of increased access to broadband internet and the hypothesized growth of income it may be associated with. Using panel data allows for the use of time and county fixed effects which helps control any unobserved factors that remain constant within counties over time as well as broader changes that affect all counties in South Carolina. This is necessary for a state like South Carolina where there are a decent number of urban counties and many rural counties to account for. Comparing Charleston to a rural county without the same level of wealth and different industries would generate spurious results. Additionally, this method is supported by similar research, the work done by Czernich et. al. (2011), who also employed a panel data analysis for a very similar research question. 
+  
+  For this analysis, there were many variables to consider. Of the considered were household median income, educational attainment, unemployment, broadband access, if a county were urban or rural, time period, and population. All variables were checked for skewedness in a histogram prior to modeling that data. Variables that were logged after checking include broadband access, population total, and median household income, and the unemployment rate. This was done to control the variance and allow for the interpretation of elasticities. All variables were collected over 2 periods of time: 2017 and 2022. Household median income was collected for all 46 counties in South Carolina for each time period. Broadband access can be defined as the percentage of households in the county with access to cable, fiber optic, or DSL methods of connecting to the internet for each period. Educational attainment can be defined as the percentage of the adult population in a county within South Carolina, ages 25 years old and older, who have attained their bachelor’s degree or higher. Unemployment rate can be defined as the percentage of the civilian labor force who are unemployed. The total population for each county in South Carolina was also collected for each time. There was also a binary variable made to determine if the county were Urban or Rural, to delineate any differences between the two county types, counties were classified as Rural if their total population was under 100,000 people, Urban otherwise. Year and county fixed effects were also added to the model for reasons previously mentioned. 
+  
+  Lastly it is important to discuss the data type and source. All data gathered on the variables above were gathered on the US Census Bureau website in the form of an ACS-5 file. While there was the option of an ACS-1 file, which would have provided annual data on the described variables, they only included counties exceeding a population of 65,000. However, the ACS-5 file provided data for all 46 counties, but each file contained the average of each variable over the past 5 years. because the ACS-5 file was an average over a 5-year period, the periods count not overlap, thus, two time periods were selected for this reason. While it is a limitation that this study does not have more time periods, it was imperative that this research included all 46 counties in South Carolina as not to be biased towards counties with larger populations.  This outcome is important to consider when results are analyzed, changes in the coefficients are gradual, and it is important to remember that all variables are the average of a 5-year interval. 
+
+
+
+## Load libraries
+```{r}
+library(tidyverse)     
+library(broom)         
+library(modelsummary)  
+```
+
+## Load Data Sets
+```{r}
+# Broadband and Income 2017 and 2022
+Broad_Income_2017 <- read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/BroadBand Data and Income Files/ACS-5 2017.csv")
+
+Broad_Income_2022 <- read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/BroadBand Data and Income Files/ACS-5 2022.csv")
+
+
+# Population Density 2017 and 2022
+POP_2017 <- read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/County Population Density/ACS-5 POP 2017.csv")
+
+POP_2022 <- read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/County Population Density/ACS-5 POP 2022.csv")
+
+
+# Educational Attainment 2017 and 2022
+EDU_2017 <- read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/Educational Attainment Files/ACS-5 EDU A 2017.csv")
+
+EDU_2022 <- read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/Educational Attainment Files/ACS-5 EDU A 2022.csv")
+
+
+# Actual income ACS 2017 and 2022
+INC_2017 <- read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/Actual Income Files/Real_Income_2017.csv")
+
+INC_2022 <- read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/Actual Income Files/Real_Income_2022.csv")
+
+
+# Unemployement Rate ACS 2017 and 2022
+UnEm_2017 <- read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/Unemployment Rate/ACS_5_unemploy_2017.csv")
+
+UnEm_2022 <-read_csv("C:/Users/annel/OneDrive/Desktop/Econometrics/Final Project/Unemployment Rate/ACS_5_unemploy_2022.csv")
+
+```
+
+## Cleaning Data
+Cleaning Data for 2017 Broadband 
+```{r}
+Broad_2017_clean <- Broad_Income_2017 %>%
+  # Target Label and Percent Estimate columns
+  select(1, contains("Percent!!Estimate", ignore.case = TRUE)) %>% 
+  
+  # Filter for the specific Broadband row
+  filter(str_detect(tolower(`Label (Grouping)`), "broadband such as cable")) %>%
+  
+  # Pivot to long format
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "broadband_pct"
+  ) %>%
+  
+  # More cleanup 
+  mutate(
+    County = str_remove_all(County, "(?i)!!Percent!!Estimate|!!Estimate|\\.\\.Total.*"),
+    County = str_remove(County, ", South Carolina"),
+    County = trimws(County),
+    broadband_pct = parse_number(broadband_pct)
+  ) %>%
+  
+  # Finalize for merge
+  filter(!is.na(broadband_pct)) %>%
+  group_by(County) %>% slice(1) %>% ungroup() %>%
+  mutate(year = 2017) 
+
+```
+
+Cleaning Data for 2017 education attainment 
+```{r}
+EDU_2017_clean <- EDU_2017 %>%
+  # Target label and Percent estimate columns
+  select(1, contains("Percent!!Estimate", ignore.case = TRUE)) %>% 
+  
+  # Filter for Bachelor's degree or higher
+  filter(str_detect(tolower(`Label (Grouping)`), "bachelor's degree or higher")) %>%
+  
+  # Pivot to long format
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "edu_pct"
+  ) %>%
+  
+  # More cleanup
+  mutate(
+    County = str_remove_all(County, "(?i)!!Percent!!Estimate|!!Estimate|\\.\\.Total.*"),
+    County = str_remove(County, ", South Carolina"),
+    County = trimws(County),
+    edu_pct = parse_number(edu_pct)
+  ) %>%
+  
+  # Finalize for merge
+  filter(!is.na(edu_pct)) %>%
+  group_by(County) %>% slice(1) %>% ungroup() %>%
+  mutate(year = 2017)
+
+```
+
+Cleaning Data for 2017 Population density
+```{r}
+
+Pop_2017_clean <- POP_2017 %>%
+  # Target the 2017 estimate columns (labels usually use '2013-2017')
+  select(1, contains("2013-2017 Estimates")) %>%
+  
+  # 2. Filter for the "Total population" row
+  filter(str_detect(tolower(`Label (Grouping)`), "total population")) %>%
+  
+  # Pivot from wide to long
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "pop_total"
+  ) %>%
+  
+  # Clean county names and convert population to numbers
+  mutate(
+    # Removes the 2017-specific period from data frame
+    County = str_remove(County, "!!2013-2017 Estimates"),
+    # Removes the state from data frame
+    County = str_remove(County, ", South Carolina"),
+    # General cleanup for any other strings leftover
+    County = str_remove_all(County, "!!Total!!Estimate|!!Estimate|\\.\\.Total.*"),
+    County = trimws(County),
+    # safely handles commas and text like "(c)"
+    pop_total = parse_number(pop_total)
+  ) %>%
+  
+  # FINAL SAFE CHECKS
+  # Remove "c" rows (NAs) and non-positive counts
+  filter(!is.na(pop_total) & pop_total > 0) %>%
+  
+  # Ensure each county only appears once
+  group_by(County) %>% 
+  slice(1) %>% 
+  ungroup() %>%
+  
+  # Label the year for the future merge
+  mutate(year = 2017)
+```
+
+Cleaning Data for 2017 Income
+```{r}
+Inc_2017_clean <- INC_2017 %>%
+  # Target the columns for "Households" estimates 
+  # This avoids "Families" or "Non-family" households which are separate units
+  select(1, contains("!!Households!!Estimate", ignore.case = TRUE)) %>% 
+  
+  # Filter for the row that contains the actual Median Dollar amount
+  filter(str_detect(tolower(`Label (Grouping)`), "median income")) %>%
+  
+  # Pivot to long format
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "median_inc"
+  ) %>%
+  
+  # Clean up County names and handle the string 
+  mutate(
+    # Remove the long Census string to leave just the County name
+    County = str_remove_all(County, ", South Carolina!!Households!!Estimate"),
+    # General safe cleanup 
+    County = str_remove_all(County, "!!Total!!Estimate|!!Estimate|\\.\\.Total.*"),
+    County = trimws(County),
+    
+    # parse_number handles the "$" and "," and "+" automatically
+    median_inc = parse_number(median_inc)
+  ) %>%
+  
+  # Final safety filter and year anchor
+  filter(!is.na(median_inc)) %>%
+  mutate(year = 2017)
+
+```
+
+Cleaning Data for 2022 Broadband 
+```{r}
+Broad_2022_clean <- Broad_Income_2022 %>%
+  # Selects the Label and only the Percent Estimate columns
+  # 'ignore.case = TRUE' causes this to ignore 'PERCENT' vs 'Percent'
+  select(1, contains("Percent!!Estimate", ignore.case = TRUE)) %>% 
+  
+  # Filter for the "Broadband such as cable, fiber optic or DSL" row
+
+  filter(str_detect(tolower(`Label (Grouping)`), "broadband such as cable")) %>%
+  
+  # Pivot to long format
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "broadband_pct"
+  ) %>%
+  
+  # Clean up names and values
+  mutate(
+    # (?i) makes the removal case insensitive
+    County = str_remove_all(County, "(?i)!!Percent!!Estimate|!!Estimate|\\.\\.Total.*"),
+    County = str_remove(County, ", South Carolina"),
+    County = trimws(County),
+    
+    # parse_number safely handles commas or footnotes like (X)
+    broadband_pct = parse_number(broadband_pct)
+  ) %>%
+  
+  # Add Year anchor and remove NAs
+  filter(!is.na(broadband_pct)) %>%
+  mutate(year = 2022)
+
+```
+
+Cleaning Data for 2022 education attainment 
+```{r}
+EDU_2022_clean <- EDU_2022 %>%
+  # Select the Label and ONLY the Percent Estimate columns
+  # 'ignore.case = TRUE' makes this much more resilient to Census typos
+  select(1, contains("Percent!!Estimate", ignore.case = TRUE)) %>% 
+  
+  # 2. Filter for the specific education level you need
+  # Usually "Bachelor's degree or higher" for economic growth studies
+  filter(str_detect(tolower(`Label (Grouping)`), "bachelor's degree or higher")) %>%
+  
+  # 3. Pivot to long format
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "edu_pct"
+  ) %>%
+  
+  # 4. Clean up names and values
+  mutate(
+    # Remove the technical suffixes to leave just the County name
+    County = str_remove_all(County, "(?i)!!Percent!!Estimate|!!Estimate|\\.\\.Total.*"),
+    County = str_remove(County, ", South Carolina"),
+    County = trimws(County),
+    
+    # Convert to number (handles cases where the cell is "-" or "N")
+    edu_pct = parse_number(edu_pct)
+  ) %>%
+  
+  # Final safety and Year tag
+  filter(!is.na(edu_pct)) %>%
+  mutate(year = 2022)
+```
+
+Cleaning Data for 2022 Population density
+```{r}
+Pop_2022_clean <- POP_2022 %>%
+  # Target only the current 5 year estimate columns
+  select(1, contains("2018-2022 Estimates")) %>%
+  
+  # Filter for the "Total population" row
+  filter(str_detect(tolower(`Label (Grouping)`), "total population")) %>%
+  
+  # Pivot from wide to long
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "pop_total"
+  ) %>%
+  
+  # Clean County names and convert population to numbers
+  mutate(
+    # Removes the technical period suffix
+    County = str_remove(County, "!!2018-2022 Estimates"),
+    # Removes the state suffix
+    County = str_remove(County, ", South Carolina"),
+    # General cleanup for any other technical strings
+    County = str_remove_all(County, "!!Total!!Estimate|!!Estimate|\\.\\.Total.*"),
+    County = trimws(County),
+    # parse_number safely handles commas and text like "(c)"
+    pop_total = parse_number(pop_total)
+  ) %>%
+  
+  # FINAL SAFETY CHECKS
+  # Remove the "c" rows (NAs) and ensure we only have positive numbers
+  filter(!is.na(pop_total) & pop_total > 0) %>%
+  
+  # Ensure each county only appears once (deduplication)
+  group_by(County) %>% 
+  slice(1) %>% 
+  ungroup() %>%
+  
+  # Label the year for the future merge
+  mutate(year = 2022)
+
+```
+
+
+Cleaning Data fro Median Household Income 2022
+```{r}
+
+Inc_2022_clean <- INC_2022 %>%
+  # Target the columns for "Households" estimates
+  # Note: 2022 files sometimes use '!!Estimate' or '!!Households!!Estimate'
+  select(1, contains("!!Households!!Estimate", ignore.case = TRUE)) %>% 
+  
+  # Filter for the row that contains the actual Median Dollar amount
+  filter(str_detect(tolower(`Label (Grouping)`), "median income")) %>%
+  
+  # Pivot to long format
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "median_inc"
+  ) %>%
+  
+  # Clean up County names
+  mutate(
+    # Remove the 2022-specific string
+    County = str_remove_all(County, ", South Carolina!!Households!!Estimate"),
+    # General safety cleanup 
+    County = str_remove_all(County, "(?i)!!Total!!Estimate|!!Estimate|\\.\\.Total.*"),
+    County = trimws(County),
+    
+    # parse_number handles the "$", ",", and "+" (e.g., "$250,000+")
+    median_inc = parse_number(median_inc)
+  ) %>%
+  
+  # Finalize for Merge
+  filter(!is.na(median_inc)) %>%
+  group_by(County) %>% slice(1) %>% ungroup() %>%
+  mutate(year = 2022)
+
+```
+
+Cleaning Data for Unemployment 2017
+```{r}
+# --- Period 1: 2017 Unemployment Cleaning ---
+UnEm_2017_clean <- UnEm_2017 %>%
+  # 1. Target Label and Percent columns
+  select(1, contains("!!Percent", ignore.case = TRUE)) %>% 
+  
+  # 2. Filter for the Unemployment Rate row
+  filter(str_detect(tolower(`Label (Grouping)`), "unemployment rate")) %>%
+  
+  # 3. Pivot to long format
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "unemploy_rate"
+  ) %>%
+  
+  # 4. Cleanup County names and convert text to numbers
+  mutate(
+    County = str_remove_all(County, "(?i)!!Percent.*|!!Estimate|\\.\\.Total.*"),
+    County = str_remove(County, ", South Carolina"),
+    County = trimws(County),
+    unemploy_rate = parse_number(unemploy_rate)
+  ) %>%
+  
+  # 5. Finalize for Merge
+  filter(!is.na(unemploy_rate)) %>%
+  mutate(year = 2017)
+```
+
+Cleaning Data for Unemployment 2022:
+```{r}
+
+UnEm_2022_clean <- UnEm_2022 %>%
+  #  Target Label and Percent columns
+  select(1, contains("!!Percent", ignore.case = TRUE)) %>% 
+  
+  #  Filter for the Unemployment Rate row
+  filter(str_detect(tolower(`Label (Grouping)`), "unemployment rate")) %>%
+  
+  #  Pivot to long format
+  pivot_longer(
+    cols = -1, 
+    names_to = "County", 
+    values_to = "unemploy_rate"
+  ) %>%
+  
+  #  Cleanup County names and convert text to numbers
+  mutate(
+    County = str_remove_all(County, "(?i)!!Percent.*|!!Estimate|\\.\\.Total.*"),
+    County = str_remove(County, ", South Carolina"),
+    County = trimws(County),
+    unemploy_rate = parse_number(unemploy_rate)
+  ) %>%
+  
+  # Finalize for Merge
+  filter(!is.na(unemploy_rate)) %>%
+  mutate(year = 2022)
+```
+
+
+```{r}
+# Deduplicate and Join 2017 
+# .keep_all = TRUE tells R to keep the data columns, not just the names.
+
+Data_2017 <- Pop_2017_clean %>%
+  distinct(County, year, .keep_all = TRUE) %>%
+  left_join(distinct(Broad_2017_clean, County, year, .keep_all = TRUE), by = c("County", "year")) %>%
+  left_join(distinct(EDU_2017_clean, County, year, .keep_all = TRUE), by = c("County", "year")) %>%
+  left_join(distinct(Inc_2017_clean, County, year, .keep_all = TRUE), by = c("County", "year"))
+
+# Deduplicate and Join 2022 ---
+Data_2022 <- Pop_2022_clean %>%
+  distinct(County, year, .keep_all = TRUE) %>%
+  left_join(distinct(Broad_2022_clean, County, year, .keep_all = TRUE), by = c("County", "year")) %>%
+  left_join(distinct(EDU_2022_clean, County, year, .keep_all = TRUE), by = c("County", "year")) %>%
+  left_join(distinct(Inc_2022_clean, County, year, .keep_all = TRUE), by = c("County", "year"))
+
+# Stack and verify
+Master_Data <- bind_rows(Data_2017, Data_2022)
+
+```
+
+
+```{r}
+# final Master Data Clean 
+Master_Data <- Master_Data %>%
+  select(County, year, pop_total, broadband_pct, edu_pct, median_inc)
+```
+
+Late addition of Unemployement to the master dataframe 
+```{r}
+# Combine unemployment years 
+Unemployment_Combined <- bind_rows(UnEm_2017_clean, UnEm_2022_clean) %>%
+  select(County, year, unemploy_rate)
+
+# Join to existing Master_Data 
+Master_Data <- Master_Data %>%
+  left_join(Unemployment_Combined, by = c("County", "year"))
+
+```
+
+Data preparation note: Large Language Model tools were employed strictly for the job of merging and cleaning the raw csv data sets as to not jeopardize the integrity of the data. All Econometric modeling, statistical interpretations, theoretical analysis, and visualizations are the original work of the Author. 
+
+# Results and Analysis 
+
+Created county type dummy
+```{r}
+# classify Urban/Rural 
+Master_Data <- Master_Data %>%
+  mutate(county_type = ifelse(pop_total > 100000, "Urban", "Rural"))
+
+```
+
+## State Wide Fixed Effects (All 46 Counties Included) Without Controls such as Unenployment rate and Educational Attainment
+```{r}
+Panel_model <- lm(log(median_inc) ~ log(broadband_pct) * county_type +log(pop_total)+ factor(County) + factor(year) , data = Master_Data)
+
+
+tidy(Panel_model) %>%
+  filter(!grepl("County", term))
+
+```
+  
+  This model purposefully omits the controls of the county unemployment rate, and the percentage of the population with higher educational attainment in order to demonstrate the effect that the omitted variable bias has, although the actual effect is not discussed until the next model where the control non-inclusive and the control inclusive models are directly compared to one another. Because this model does not contain the county level unemployment rate and educational attainment, the results may not demonstrate the true relationship between Broadband internet access and the average household median income for urban and rural areas, however it will be analyzed none the less.
+
+  Holding internet access constant, for every 1 percent increase in the population there is an associated .32 percent increase in the average household median income, factoring for year and county. As represented by: fixed effects log(pop_total). This variable was included in all the models because it accounts for agglomeration, when bigger cities have bigger incomes simply because of their size. This coefficient’s p-value is actually less the standard .05 significance value, making it a significant finding 
+
+  The most important result from the table is “log(broadband_pct):county_typeUrban’ which represents the difference between urban and rural counties and their broadband coefficients. Holding all variables and fixed effects constant, Urban counties are shown to have -.13% difference in household median income growth per 1% increase in broadband than rural counties. However, unlike the previous coefficient, the p value is .343, not statistically significant at the 5% significance level. it is important to note that although the difference is described as -.13, Urban counties still demonstrate a positive relationship between household median income and broadband access. 
+
+
+
+## State wide fixed effects with added controls unemployment rate and educational attainment:
+```{r}
+Panel_model <- lm(log(median_inc) ~ log(broadband_pct) * county_type +log(pop_total)+ factor(year) +factor(County) + log(unemploy_rate) + edu_pct , data = Master_Data)
+
+
+
+tidy(Panel_model) %>%
+  filter(!grepl("County", term))
+
+```
+
+  Continuing the controls were added to the exact same model as up above to account for the previously omitted variables. When these variables are accounted for, every single coefficient on the table shrinks, potentially showing a more accurate image of the relationship between all the variables. However, it is very interesting to observe that the coefficients for the percentage change in the unemployment rate and the percentage of education are very low in comparison to the other coefficients. Both variables were tested in a histogram for skewedness and they were logged appropriately. A potential explanation is that educational attainment doesn’t change very much in 5 years, and due to the limitations of the time range of periods, that is not something that can be improved. And then additionally, the year and county fixed effects may be taking to much credit.
+  
+Holding all else constant, for every 1% increase in the unemployment rate percent in Rural counties in South Carolina, there is an associated 0.0005% decrease in the median household income. 
+  Holding all else constant, for every one percent increase in the percent of adults over the age of 25 who have attained at least their bachelors degree in Rural counties in South Carolina, there is an associated 0.24 % increase in the median household income.
+  Both coefficients' p-values were not smaller than the significance value of .05, meaning that the previous interpretations were not significantly significant. However it is important to note that the coefficient for log(broadband_pct),  the affect that rural broadband access has on household median income, is statistically significant.
+
+## Visual Representation
+```{r}
+# Compute within-county demeaned variables
+demeaned <- Master_Data %>%
+  group_by(County)%>%
+  mutate(
+    income_demeaned = log(median_inc) - mean(log(median_inc), na.rm = TRUE),
+    broadband_demeaned = log(broadband_pct) - mean(log(broadband_pct), na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+  ggplot(demeaned, aes(x = broadband_demeaned, y = income_demeaned, color=county_type)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title    = "Rural vs Urban Broadband growth and Income within county",
+    subtitle = "Each country's values are centered around their own mean",
+    x        = "Change in Log Broadband (Demeaned)",
+    y        = "Change in Log Median Income (Demeaned)",
+    color    = "County Type"
+  ) +
+  theme_minimal()
+```
+
+  Here we have a graph that is demeaned. Every red dot is a rural county, and every blue dot is an urban county. Every dot before the 0 on the x axis represents a county in the first period, 2017, and every dot after represents a county in the period of 2022. This graph is an excellent illustration of hierarchical diffusion. The graph suggests that The urban counties take less time to adopt high levels of infrastructure innovation and their dispersion on the graph is very clustered, indicating relatively synchronous behavior. 
+  However, this graph does not visually represent the models that were previously discussed. the fixed effects models suggest that for every 1% increase in the broadband internet access, they received a higher marginal effect on the median household income than the Urban counties. However both coefficients still indicated a positive relationship, they just difference in the extent. The graph on the other hand, suggests that the urban counties receive a higher marginal effect on their median household income than the rural counties. a possible explanation to this discrepancy is that the graph does not account for the same fixed effects and control variables as the other, making the the model results more reliable than the visualization. 
+
+# Conclusion
+  So, what is the relationship between broadband internet access and household income in rural and urban counties in South Carolina? In all models presented it was found that, for both urban and rural counties in South Carolina, there is a positive correlation between broadband internet access and the median household income. Additionally, the visualization did not account for the omitted variables such as educational attainment and the unemployment rate. But it is equally important to note that they illustrated the behavior of hierarchical diffusion via the way the red dots were dispersed and the blue urban dots were clustered and seemed to move together, illustrating some sort of time lag.  However, there were several limitations to this study. The number of time periods available for this panel data analysis was less than desirable. With more periods of time comes more observations which would make the model lean more towards causality. The model closest to causality was the second model that accounted for the omitted variables educational attainment and unemployment rate, however due to the lack of time periods available I cannot claim causality.   
+
+# Sources 
+AT&T. (2019, June 20). AT&T invests nearly $825 million over 3-year period to boost local networks in South Carolina [Press release]. PR Newswire. https://www.prnewswire.com/news-releases/att-invests-nearly-825-million-over-3-year-period-to-boost-local-networks-in-south-carolina-300872407.html
+
+Czernich, N., Falck, O., Kretschmer, T., & Woessmann, L. (2011). Broadband infrastructure and economic growth. The Economic Journal, 121(552), 505–532.
+https://doi.org/10.1111/j.1468-0297.2011.02420.x
+
+Frost, M. (Writer), & Lynch, D. (Director). (1990, April 19). Episode 2 [Television series episode]. In M. Frost & D. Lynch (Executive Producers), Twin Peaks. Lynch/Frost Productions; Propaganda Films.
+
+Rogers, E. M. (2003). Diffusion of innovations (5th ed.). Free Press.
+
+Röller, L.-H., & Waverman, L. (2001). Telecommunications infrastructure and economic development: A simultaneous approach. American Economic Review, 91(4), 909–923. https://doi.org/10.1257/aer.91.4.909
+
+South Carolina Office of Regulatory Staff. (2024, January 23). SCBBO completes historic $400 million American Rescue Plan commitment to connect over 112,380 South Carolina households and businesses to high-speed internet [News release]. https://ors.sc.gov/news/scbbo-completes-historic-400-million-american-rescue-plan-commitment-connect-over-112380
+
+U.S. Census Bureau. (n.d.). COMPARATIVE DEMOGRAPHIC ESTIMATES. American Community Survey, ACS 5-Year Estimates Comparison Profiles, Table CP05. Retrieved April 14, 2026, from https://data.census.gov/table/ACSCP5Y2017.CP05?t=Older+Population:Population+Total:Populations+and+People&g=040XX00US45$0500000
+
+U.S. Census Bureau. (n.d.). INCOME IN THE PAST 12 MONTHS (IN 2017 INFLATION-ADJUSTED DOLLARS). American Community Survey, ACS 5-Year Estimates Subject Tables, Table S1901. Retrieved April 14, 2026, from https://data.census.gov/table/ACSST5Y2017.S1901?t=Income+(Households,+Families,+Individuals)&g=040XX00US45$0500000
+
+U.S. Census Bureau. (n.d.). Selected Economic Characteristics. American Community Survey, ACS 5-Year Estimates Data Profiles, Table DP03. Retrieved April 29, 2026, from https://data.census.gov/table/ACSDP5Y2022.DP03?q=unemployment&g=040XX00US45$0500000
+
+U.S. Census Bureau. (n.d.). Types of Computers and Internet Subscriptions. American Community Survey, ACS 5-Year Estimates Subject Tables, Table S2801. Retrieved April 14, 2026, from https://data.census.gov/table/ACSST5Y2022.S2801?q=broadband&t=Educational+Attainment&g=040XX00US45$0500000
+
+U.S. Census Bureau, U.S. Department of Commerce. (n.d.). Educational Attainment. American Community Survey, ACS 5-Year Estimates Subject Tables, Table S1501. Retrieved April 14, 2026, from https://data.census.gov/table/ACSST5Y2023.S1501?q=Education&g=040XX00US45$0500000
+
+Whitacre, B., Gallardo, R., & Strover, S. (2014). Broadband’s contribution to economic growth in rural areas: Moving towards a causal relationship. Telecommunications Policy, 38(11), 1011–1023. https://doi.org/10.1016/j.telpol.2014.05.005
+
+
+
